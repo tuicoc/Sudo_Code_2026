@@ -1,0 +1,8 @@
+jupyter
+ipykernel
+gensim
+underthesea
+kagglehub
+requests
+scikit-learn
+matplotlib
