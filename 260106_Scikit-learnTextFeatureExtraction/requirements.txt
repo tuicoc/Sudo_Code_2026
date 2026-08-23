@@ -1,0 +1,5 @@
+jupyter
+ipykernel
+pandas
+pyarrow
+scikit-learn
