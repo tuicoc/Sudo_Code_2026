@@ -1,0 +1,13 @@
+# Datasets, caches, and trained models (large, regenerable, not source)
+data/
+
+# Editor / IDE
+.idea/
+.ipynb_checkpoints/
+
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store

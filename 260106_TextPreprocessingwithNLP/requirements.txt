@@ -1,0 +1,5 @@
+jupyter
+ipykernel
+kagglehub[pandas-datasets]
+nltk
+pyarrow
