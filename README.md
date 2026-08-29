@@ -34,6 +34,7 @@ Every `260106_*` project folder:
 260106_TopicName/
 ├── requirements.txt      # only what this project needs, into the repo's shared .venv
 ├── Personal Note.md       # learning log — plan first, findings after
+│                         #   (2+ note files → a note/ folder instead, see below)
 ├── data/
 │   ├── raw/               # input as downloaded/scraped — nothing this project generated
 │   ├── processed/         # cleaned/intermediate data this project's own logic produced
@@ -48,6 +49,12 @@ Every `260106_*` project folder:
   followed one step at a time while learning. Keep it updated afterward with what actually
   happened — confusions, mistakes and why the fix was right, decisions and the reasoning. A
   journal, not a spec; prose, not a checklist restating the code.
+- **`note/`**: as long as the learning log is the only note file, it sits at the project root as
+  `Personal Note.md`. **As soon as there is a second note file** — an annotated course PDF, a marked-up
+  book chapter, a slide deck read alongside the work — both move into a `note/` folder so the project
+  root stays down to `requirements.txt`, `data/`, `notebooks/` and one folder of notes. Existing
+  examples: `260106_MachineLearningForNlp/note/` and `260106_DeepLearningForNlp/note/`. Give the
+  reading material a descriptive name, not whatever the download was called.
 - **`data/{raw,processed,outputs}`**: not every project needs all three (a project that only
   consumes another project's finished output may have only `raw/`), but when a subfolder exists it
   means what it says. A file that arrives already preprocessed from an earlier project (e.g.
