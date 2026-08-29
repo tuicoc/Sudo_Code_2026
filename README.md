@@ -88,3 +88,4 @@ Vietnamese text preprocessing).
 | [`260106_Word2Vec`](260106_Word2Vec) | Word2Vec trained on Vietnamese Wikipedia (viwik18) with gensim |
 | [`260106_MachineLearningForNlp`](260106_MachineLearningForNlp) | Naive Bayes vs. SVM on Vietnamese product-review sentiment classification |
 | [`260106_DeepLearningForNlp`](260106_DeepLearningForNlp) | A first neural network (Keras) for 10-class Vietnamese news topic classification on VNTC |
+| [`260106_SequentialModel`](260106_SequentialModel) | A word-level LSTM language model that generates Vietnamese, trained on a sample of 10,000 books |
