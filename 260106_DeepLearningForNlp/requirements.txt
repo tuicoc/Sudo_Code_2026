@@ -1,0 +1,7 @@
+jupyter
+ipykernel
+tensorflow==2.16.2
+underthesea
+scikit-learn
+scipy
+matplotlib

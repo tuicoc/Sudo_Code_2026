@@ -87,3 +87,4 @@ Vietnamese text preprocessing).
 | [`260106_Scikit-learnTextFeatureExtraction`](260106_Scikit-learnTextFeatureExtraction) | TF-IDF feature extraction with scikit-learn |
 | [`260106_Word2Vec`](260106_Word2Vec) | Word2Vec trained on Vietnamese Wikipedia (viwik18) with gensim |
 | [`260106_MachineLearningForNlp`](260106_MachineLearningForNlp) | Naive Bayes vs. SVM on Vietnamese product-review sentiment classification |
+| [`260106_DeepLearningForNlp`](260106_DeepLearningForNlp) | A first neural network (Keras) for 10-class Vietnamese news topic classification on VNTC |
