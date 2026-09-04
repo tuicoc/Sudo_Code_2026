@@ -1,0 +1,71 @@
+# Every default and hardcoded value the pipeline uses. Nothing below is repeated in src/.
+
+dataset:
+  name: VNTC 10Topics Ver1.1
+  url: https://github.com/duyvuleo/VNTC
+  # The archives ship as .rar inside the repo; unpack them into data/raw/ (see README).
+  splits: [Train_Full, Test_Full]
+  # The corpus is UTF-16LE with CRLF line endings. Reading it as UTF-8 does not raise --
+  # it silently yields nulls between characters, which is the whole reason this is here.
+  raw_encoding: utf-16
+
+paths:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  outputs_dir: data/outputs
+  features_train: data/processed/tfidf_train.npz
+  features_test: data/processed/tfidf_test.npz
+  labels_train: data/processed/y_train.npy
+  labels_test: data/processed/y_test.npy
+  vocabulary_file: data/processed/vocabulary.json
+  model_file: data/outputs/nn_tfidf.keras
+  history_file: data/outputs/history.json
+  train_meta_file: data/outputs/train_meta.json
+  test_metrics_file: data/outputs/nn_test_metrics.json
+  comparison_file: data/outputs/comparison.json
+  learning_curves_figure: data/outputs/learning_curves.png
+  confusion_matrix_figure: data/outputs/confusion_matrix.png
+  comparison_figure: data/outputs/comparison.png
+
+preprocessing:
+  # Word segmentation runs once, offline, and the result is cached to data/processed/:
+  # underthesea on 84k articles is far too slow to sit inside a training loop.
+  workers: 8
+  # Progress line every N files.
+  report_every: 5000
+
+features:
+  max_features: 10000
+  min_df: 3
+  # Punctuation to strip, minus the underscore -- the underscore is what holds a segmented
+  # compound ("xuất_khẩu") together as one token.
+  extra_punctuation: '“”‘’…–—•·'
+  # strip_accents MUST stay null: stripping accents would collapse Vietnamese words that
+  # differ only by diacritic into one feature.
+  strip_accents: null
+
+model:
+  hidden_units: 256
+  dropout: 0.5
+  n_classes: 10
+  optimizer: adam
+  loss: sparse_categorical_crossentropy
+
+training:
+  seed: 42
+  epochs: 30
+  batch_size: 128
+  validation_split: 0.2
+  early_stopping:
+    monitor: val_loss
+    patience: 3
+    restore_best_weights: true
+
+evaluation:
+  # Published RIVF'07 results on this exact test set, as the yardstick to check against.
+  baselines:
+    RIVF'07 SVM Multi: 0.934
+    RIVF'07 NGRAM: 0.971
+  top_confusions: 6
+  figure:
+    dpi: 110

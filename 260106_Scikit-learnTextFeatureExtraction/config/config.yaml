@@ -1,0 +1,33 @@
+# Every default and hardcoded value the pipeline uses. Nothing below is repeated in src/.
+
+paths:
+  # Produced by 260106_TextPreprocessingwithNLP. It arrives already preprocessed, but it
+  # is still `raw/` from this project's point of view: external input this project did
+  # not generate itself.
+  input_file: data/raw/processed_news.parquet
+  outputs_dir: data/outputs
+
+# The upstream project that writes the input file, quoted in the error message shown when
+# the file is missing.
+upstream:
+  project: 260106_TextPreprocessingwithNLP
+  command: python main.py
+
+data:
+  # The column holding the cleaned, tokenized, stopword-free article text.
+  text_column: content_no_stopwords
+
+vectorizer:
+  # Ignore terms appearing in fewer than this many documents -- drops typos and one-off
+  # proper nouns that would otherwise bloat the vocabulary.
+  min_df: 5
+  # The two configurations compared in the notebook. `max` is inclusive, as in sklearn.
+  ngram_ranges:
+    unigram: [1, 1]
+    unigram_bigram: [1, 2]
+
+report:
+  # Which document to break down term by term.
+  example_row: 0
+  # How many of its highest-scoring terms to show.
+  top_n: 15

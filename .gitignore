@@ -1,5 +1,9 @@
-# Datasets, caches, and trained models (large, regenerable, not source)
-data/
+# Datasets, caches, and trained models: large, regenerable, and per the mentor's
+# instruction never committed -- the README says how to download them instead.
+# The empty folder skeleton is kept so a fresh clone has somewhere to put them.
+**/data/**
+!**/data/**/
+!**/data/**/.gitkeep
 
 # Editor / IDE
 .idea/

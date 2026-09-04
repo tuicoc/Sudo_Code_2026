@@ -1,0 +1,51 @@
+# Every default and hardcoded value the pipeline uses. Nothing below is repeated in src/.
+
+dataset:
+  # Vietnamese online news articles: id, source, topic, title, content.
+  kaggle_id: haitranquangofficial/vietnamese-online-news-dataset
+  file_name: news_dataset.json
+
+stopwords:
+  kaggle_id: heeraldedhia/stop-words-in-28-languages
+  file_name: vietnamese.txt
+
+paths:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  # The feature-extraction project consumes this file by path -- never by import.
+  # See the repo README, "Cross-project data flow".
+  export_file: ../260106_Scikit-learnTextFeatureExtraction/data/raw/processed_news.parquet
+
+# Regexes used both to survey the corpus for noise and to remove it. Single-quoted so
+# YAML leaves the backslashes alone.
+patterns:
+  email: '[\w.+-]+@[\w-]+(?:\.[\w-]+)+'
+  url: 'https?://[^\s"''<>]+'
+  # Looser than `url`, for the cleaning pass: also catches bare "www." prefixes.
+  url_loose: 'http\S+|www\.\S+'
+  phone: '(?<!\d)(?:0|\+84)[\s.\-]?\d{2,3}[\s.\-]?\d{3}[\s.\-]?\d{3,4}(?!\d)'
+  # Crawler artifact: a JavaScript block the scraper left inside the article body.
+  cdata: '//<!\[CDATA\[.*?//\]\]>'
+  # A source crediting itself as "Kienthuc.net.vn", with no http:// for `url` to catch.
+  domain: '\b(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+(?:vn|com|net|org|edu|gov|info|io|tv)\b'
+  # Press-license numbers in footers, e.g. "GP-STTTT". Without this they fragment
+  # into "gp" + "stttt" once the hyphen is stripped as punctuation.
+  reference_code: '\b[A-ZĐ]{1,4}-[A-ZĐ0-9]{2,8}\b'
+  html_tag: '<.*?>'
+  digits: '[0-9]+'
+  whitespace_run: '\s+'
+
+preprocessing:
+  # Curly quotes, ellipsis and dashes -- Unicode punctuation that string.punctuation misses.
+  extra_punctuation: '“”‘’…–—'
+  # The one abbreviation confirmed to carry real signal in this corpus. Keys and values are
+  # space-padded so only whole words match.
+  teencode:
+    ' đc ': ' được '
+  nltk_tokenizer_model: punkt_tab
+
+export:
+  columns: [id, source, topic, content_no_stopwords]
+
+# The article used throughout the notebook to show each stage's before/after.
+demo_index: 79

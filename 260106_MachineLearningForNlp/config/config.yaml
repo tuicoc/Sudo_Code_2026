@@ -1,0 +1,71 @@
+# Every default and hardcoded value the pipeline uses. Nothing below is repeated in src/.
+
+dataset:
+  kaggle_id: tuannguyenvananh/vietnamese-text-classification-dataset
+  file_name: train.csv
+  # The CSV ships without a header row.
+  columns: [label, comment]
+
+stopwords:
+  kaggle_id: heeraldedhia/stop-words-in-28-languages
+  file_name: vietnamese.txt
+
+paths:
+  raw_file: data/raw/train.csv
+  processed_file: data/processed/reviews.parquet
+  outputs_dir: data/outputs
+  comparison_figure: data/outputs/comparison.png
+
+patterns:
+  url: 'http\S+|www\.\S+'
+  digits: '[0-9]+'
+  whitespace_run: '\s+'
+
+preprocessing:
+  extra_punctuation: '“”‘’…–—'
+  # Expanded *after* tokenizing, so the map lists bare tokens, not space-padded strings.
+  teencode:
+    vs: với
+  # Stopword removal is deliberately NOT applied -- see the note in preprocessing.py and
+  # `note/Personal Note.md`. The list is still loaded so the decision can be shown, not
+  # just asserted.
+  remove_stopwords: false
+
+evaluation:
+  n_splits: 5
+  random_state: 42
+  # Macro averaging weights every class equally, so the smaller class cannot be ignored.
+  average: macro
+
+# One entry per (vectorizer, model) combination to evaluate. `key` is the metrics file
+# stem in data/outputs/; `label` is what appears in the table and the chart.
+experiments:
+  - key: nb_bow
+    label: NB + Bag-of-Words
+    vectorizer: count
+    model: multinomial_nb
+    color: '#4C72B0'
+  - key: nb_tfidf
+    label: NB + TF-IDF
+    vectorizer: tfidf
+    model: multinomial_nb
+    color: '#DD8452'
+  - key: svm_tfidf
+    label: SVM + TF-IDF
+    vectorizer: tfidf
+    model: linear_svc
+    color: '#55A868'
+
+vectorizer:
+  # Bigrams matter here: "không tốt" (not good) only reads as negative as a pair.
+  ngram_range: [1, 2]
+  min_df: 2
+
+report:
+  metrics: [accuracy, precision_macro, recall_macro, f1_macro]
+  metric_labels: ["Accuracy", "Precision\n(macro)", "Recall\n(macro)", "F1\n(macro)"]
+  title: "Naive Bayes vs SVM: Bag-of-Words vs TF-IDF"
+  figure:
+    width: 9
+    height: 5.5
+    dpi: 150

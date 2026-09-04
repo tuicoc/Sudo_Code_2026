@@ -1,0 +1,86 @@
+# Every default and hardcoded value the pipeline uses. Nothing below is repeated in src/.
+
+dataset:
+  kaggle_id: iambestfeeder/10000-vietnamese-books
+  # 10,415 plain .txt books, ~1.73 GB. kagglehub nests them; the loader searches for the
+  # folder holding the .txt files rather than hardcoding a version-specific path.
+  books_glob: '*.txt'
+
+paths:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  outputs_dir: data/outputs
+  train_tokens: data/processed/train_tokens.npy
+  val_tokens: data/processed/val_tokens.npy
+  vocabulary_file: data/processed/vocab.json
+  model_file: data/outputs/lstm_lm.keras
+  training_log: data/outputs/training_log.csv
+  metrics_file: data/outputs/lm_metrics.json
+
+patterns:
+  url: 'https?://\S+|\bwww\.\S+'
+  email: '[\w.+-]+@[\w-]+(?:\.[\w-]+)+'
+  phone: '(?<!\d)(?:0|\+84)[\s.\-]?\d{2,3}[\s.\-]?\d{3}[\s.\-]?\d{3,4}(?!\d)'
+  domain: '\b(?:[a-zA-Z0-9][a-zA-Z0-9-]{0,61}\.)+(?:vn|com|net|org|edu|gov|info)\b'
+  html_tag: '</?[a-zA-Z][^>]{0,60}>'
+  html_entity: '&[a-z]{2,8};|&#\d{2,5};'
+  control_char: '[\x00-\x08\x0b\x0c\x0e-\x1f]'
+  whitespace_run: '\s+'
+  # Letters | digits | a single punctuation mark. Punctuation is KEPT as its own token:
+  # this is a generative model, and text without punctuation is not text.
+  token: '[^\W\d_]+|\d+|[^\w\s]'
+
+preprocessing:
+  workers: 8
+  # Progress line every N books.
+  report_every: 2500
+  chunk_size: 16
+
+vocabulary:
+  size: 20000
+  # Index 0 is reserved for <pad> and never emitted, so a padded batch cannot be confused
+  # with real text. <eob> marks an end of book.
+  specials: ['<pad>', '<unk>', '<eob>']
+  # Vocabulary sizes reported by the coverage table, to justify the choice above.
+  coverage_targets: [5000, 10000, 15000, 20000, 30000, 50000]
+
+corpus:
+  # Books whose tokens go to validation rather than training.
+  val_fraction: 0.02
+  split_seed: 42
+
+model:
+  seq_len: 100
+  embed_dim: 256
+  lstm_units: 512
+  # 0.0 is required for the cuDNN fast path; anything else silently falls back to a
+  # much slower generic implementation.
+  recurrent_dropout: 0.0
+  learning_rate: 0.001
+
+training:
+  batch_size: 128
+  epochs: 3
+  shuffle_buffer: 10000
+  seed: 42
+  # Cap on training tokens, to keep a local CPU run to minutes rather than hours.
+  # null = the whole corpus (~334 M tokens).
+  subset_tokens: 4000000
+  early_stopping:
+    monitor: val_loss
+    patience: 2
+    restore_best_weights: true
+
+generation:
+  seed_text: "ông ấy nhìn ra ngoài cửa sổ và"
+  n_tokens: 50
+  temperature: 0.9
+  top_k: 40
+  seed: 0
+  # The settings compared side by side by `main.py --stage generate`.
+  sweep:
+    temperatures: [0.5, 0.8, 1.2]
+  prompts:
+    - "ngày hôm đó trời mưa rất to"
+    - "cô bé mở cánh cửa và thấy"
+    - "trong làng có một ông già"

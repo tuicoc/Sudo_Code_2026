@@ -1,0 +1,52 @@
+# Every default and hardcoded value the pipeline uses. Nothing below is repeated in src/.
+
+corpus:
+  # viwik18: a cleaned Vietnamese Wikipedia dump, already lowercased and stripped of
+  # punctuation, split across ten ~94 MB shards.
+  base_url: https://raw.githubusercontent.com/NTT123/viwik18/master/dataset/
+  shard_prefix: viwik18_a
+  shard_suffixes: abcdefghij
+  download_timeout_seconds: 120
+  # For sampling the corpus with an HTTP Range request instead of paying for a full shard.
+  sample_bytes: 200000
+  sample_timeout_seconds: 30
+
+stopwords:
+  kaggle_id: heeraldedhia/stop-words-in-28-languages
+  file_name: vietnamese.txt
+
+paths:
+  raw_dir: data/raw
+  sentences_file: data/processed/sentences.txt
+  outputs_dir: data/outputs
+  model_file: data/outputs/word2vec_viwik18.model
+  tsne_figure: data/outputs/embeddings_tsne.png
+
+preprocessing:
+  # viwik18 has no punctuation at all, so there is no period to split sentences on. Runs
+  # of two or more spaces are where a title or paragraph break used to be -- see
+  # Personal Note.md. This is the sentence boundary the corpus actually offers.
+  segment_boundary: '\s{2,}'
+
+word2vec:
+  vector_size: 100
+  window: 5
+  min_count: 5
+  # 1 = skip-gram. Slower than CBOW but better on the rarer words, which is most of the
+  # vocabulary of a Wikipedia dump.
+  sg: 1
+  # null = use every core the machine has.
+  workers: null
+
+evaluation:
+  seed_words: [việt_nam, hà_nội, internet, chính_phủ, khoa_học]
+  neighbors_per_seed: 12
+  tsne:
+    random_state: 42
+    # Clamped to the number of points actually plotted; t-SNE requires perplexity < n.
+    max_perplexity: 15
+    init: pca
+  figure:
+    width: 12
+    height: 10
+    dpi: 150
