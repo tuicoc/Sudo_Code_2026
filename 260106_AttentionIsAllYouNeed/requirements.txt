@@ -1,0 +1,13 @@
+# Versions pinned to what this project was actually developed and run against.
+#   pip install -r requirements.txt
+# The reference results came off Kaggle, which had tensorflow 2.20.0 / keras 3.13.2 -- the code
+# runs unchanged on both, which is the only compatibility claim made here.
+jupyter==1.1.1
+ipykernel==6.29.5
+tensorflow==2.16.2
+numpy==1.26.4
+pandas==2.2.3
+pyarrow==17.0.0
+matplotlib==3.9.2
+requests==2.32.3
+PyYAML==6.0.2

@@ -123,3 +123,4 @@ any new Vietnamese text preprocessing).
 | [`260106_MachineLearningForNlp`](260106_MachineLearningForNlp) | Naive Bayes vs. SVM on Vietnamese review sentiment | SVM+TF-IDF, macro-F1 0.801 |
 | [`260106_DeepLearningForNlp`](260106_DeepLearningForNlp) | A first neural network (Keras) for 10-class VNTC topic classification | accuracy 0.9266, macro-F1 0.9087 |
 | [`260106_SequentialModel`](260106_SequentialModel) | A word-level LSTM language model generating Vietnamese | val perplexity 220 vs 20,000 uniform |
+| [`260106_AttentionIsAllYouNeed`](260106_AttentionIsAllYouNeed) | Attention written by hand, on Vietnamese news summarization (VNDS) | attention +1.05 ROUGE-1; Lead-1 baseline still wins |

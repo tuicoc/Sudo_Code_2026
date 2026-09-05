@@ -1,0 +1,88 @@
+# Every default and hardcoded value the pipeline uses. Nothing below is repeated in src/.
+
+dataset:
+  # The original VNDS release is 150,704 separate .txt.seg files on GitHub, which is painful to
+  # fetch. This mirror is the same corpus as three parquet files, needs no login, and keeps the
+  # original word segmentation (khởi_tố, ma_tuý).
+  base_url: https://huggingface.co/datasets/nam194/vietnews/resolve/main/data
+  files:
+    train: train-00000-of-00001-84acb79f6c6547a5.parquet
+    validation: validation-00000-of-00001-210cc51bf3cdb90f.parquet
+    test: test-00000-of-00001-123f98d55067eb7b.parquet
+  # How much of each split to use. A random sample, not the head of the file -- `guid` is
+  # sequential, so the first rows are one stretch of the crawl rather than a sample of the corpus.
+  # null = the whole split (99,134 / 22,184 / 22,498).
+  subset:
+    train: 15000
+    validation: 1500
+    test: 1000
+
+paths:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  outputs_dir: data/outputs
+  vocabulary_file: data/processed/vocab.json
+  encoded_file: data/processed/encoded.npz
+  metrics_file: data/outputs/attention_metrics.json
+  learning_curves: data/outputs/learning_curves.png
+  attention_plot: data/outputs/attention.png
+
+preprocessing:
+  # Tokens kept from the start of the article. Attention costs memory in proportion to
+  # article_length x summary_length, so this is the most expensive number in the project.
+  # Measured trade: 256 tokens still contain 73.4% of the abstract's words against 80.1% for the
+  # whole article -- 6.7 points given up for a 40% shorter sequence.
+  max_article: 256
+  # Includes <bos> and <eos>. Covers 99.8% of abstracts.
+  max_summary: 64
+  # VNDS is pre-tokenized, so punctuation is space-separated and a sentence ends at ' . '.
+  sentence_split: '(?<= \.) '
+
+vocabulary:
+  size: 20000
+  # Index 0 is <pad> so padding can never be a real word. <bos>/<eos> tell the decoder where a
+  # summary starts and stops -- without <eos> the model has no way to say it is finished.
+  specials: ['<pad>', '<unk>', '<bos>', '<eos>']
+  coverage_targets: [5000, 10000, 20000, 30000]
+
+model:
+  embed_dim: 128
+  units: 256
+  # Width of the additive-attention scoring layer. Vectorised, additive scoring builds a
+  # (batch, summary_len, article_len, attn_units) tensor, so this number multiplies memory.
+  attn_units: 64
+
+training:
+  batch_size: 32
+  epochs: 15
+  learning_rate: 0.001
+  # Not optional for a recurrent model over hundreds of steps: gradients are multiplied through
+  # every step and can grow without bound.
+  clipnorm: 1.0
+  shuffle_buffer: 4096
+  seed: 42
+  # fp16 is a hazard here, not just a speedup: attention masks padding by adding -1e9 before the
+  # softmax, and -1e9 is -inf in fp16 (whose maximum is 65504), which makes the softmax NaN.
+  # src/attention.py computes its scores in float32, so this is safe to turn on -- but the models
+  # train in minutes at fp32, so it buys little.
+  mixed_precision: false
+  early_stopping:
+    monitor: val_loss
+    patience: 3
+    restore_best_weights: true
+  # Which variants to train. 'none' is the control -- the same model with the attention layer
+  # removed, which is the only comparison that isolates what attention is worth.
+  variants: [none, additive, dot]
+
+decoding:
+  # Greedy decoding loops: it reaches a state whose likeliest continuation returns to that state.
+  # Refusing any token that would complete an already-generated n-gram of this size stops it.
+  block_ngram: 3
+  batch_size: 128
+  n_examples: 3
+
+evaluation:
+  # Copy the first n sentences of the article. On news this is a hard baseline, not a formality.
+  lead_baselines: [1, 2, 3]
+  # The article whose attention weights get plotted.
+  attention_example: 0
