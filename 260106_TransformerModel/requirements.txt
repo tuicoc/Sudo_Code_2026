@@ -1,0 +1,14 @@
+# Versions pinned to what this project was actually developed and run against.
+#   pip install -r requirements.txt
+# The reference results came off Kaggle, which had tensorflow 2.20.0 / keras 3.13.2 -- the code
+# runs unchanged on both, which is the only compatibility claim made here.
+jupyter==1.1.1
+ipykernel==6.29.5
+tensorflow==2.16.2
+numpy==1.26.4
+matplotlib==3.9.2
+requests==2.32.3
+PyYAML==6.0.2
+# Only used to cross-check this project's own BLEU implementation. Kaggle does not ship it, so
+# the reference run skipped that check; nothing else depends on it.
+sacrebleu==2.4.3

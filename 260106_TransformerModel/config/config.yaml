@@ -1,0 +1,78 @@
+# Every default and hardcoded value the pipeline uses. Nothing below is repeated in src/.
+
+dataset:
+  # EVBNews v2.0: 1,000 parallel news documents, 45,308 sentence pairs, sentence-aligned and
+  # hand-aligned at word level. The archive is .rar, which needs an external tool -- see
+  # DataLoader.extract for the list that gets tried.
+  archive_url: https://github.com/qhungngo/EVBCorpus/raw/master/EVBCorpus_EVBNews_v2.0.rar
+  archive_name: evbnews.rar
+  corpus_dir: data/raw/evbnews
+  # Whole documents are held out, not sentences: sentences from one article share names, dates
+  # and phrasing, so a sentence-level split scores partly on memorisation.
+  val_docs: 50
+  test_docs: 50
+  # Cap on training documents, so a local CPU run finishes in minutes. null = all 900.
+  max_train_docs: null
+  split_seed: 42
+
+paths:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  outputs_dir: data/outputs
+  vocabulary_file: data/processed/vocab.json
+  encoded_file: data/processed/encoded.npz
+  weights_file: data/outputs/transformer_en_vi.weights.h5
+  metrics_file: data/outputs/translation_metrics.json
+  learning_curves: data/outputs/learning_curves.png
+  attention_plot: data/outputs/cross_attention.png
+
+preprocessing:
+  # Tokens per side, including <bos>/<eos> on the target. Keeps 97.3% of the training pairs.
+  max_len: 64
+  # English has 31,364 distinct word types here; Vietnamese only 14,071, because it writes
+  # syllables and its syllable inventory is close to a closed set. Hence the asymmetry: 16k
+  # covers 97.50% of English, 8k covers 99.35% of Vietnamese.
+  en_vocab: 16000
+  vi_vocab: 8000
+  specials: ['<pad>', '<unk>', '<bos>', '<eos>']
+  coverage_targets: [4000, 8000, 16000, 24000]
+
+model:
+  num_layers: 4
+  d_model: 128
+  num_heads: 8
+  dff: 512
+  dropout: 0.1
+
+training:
+  # Global batch = this x number of replicas. MirroredStrategy splits it between the GPUs.
+  per_replica_batch: 64
+  epochs: 30
+  # The paper's 4000 assumes a much longer run: at ~300 steps/epoch that would be 13 epochs of
+  # warmup out of 30. Scaled to roughly 10% of training instead.
+  warmup_steps: 1000
+  label_smoothing: 0.1
+  patience: 5
+  # Early stopping watches ACCURACY, not loss. Label smoothing adds eps*mean(-log p_v), which
+  # grows as the model gets confident, so validation loss rises while the model is still
+  # improving. On the reference run the two disagreed about which epoch was best.
+  monitor: val_masked_accuracy
+  monitor_mode: max
+  shuffle_buffer: 8192
+  seed: 42
+  mixed_precision: false
+  use_multi_gpu: true
+
+decoding:
+  batch_size: 128
+  beam_width: 4
+  # Beam search runs one source sentence at a time, so it is capped rather than run on the
+  # whole test set.
+  beam_sentences: 300
+  n_examples: 6
+
+evaluation:
+  max_ngram: 4
+  # Sentences used for the cross-attention vs human-alignment comparison.
+  alignment_sentences: 256
+  attention_example: 0
